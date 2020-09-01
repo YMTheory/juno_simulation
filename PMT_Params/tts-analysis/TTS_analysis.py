@@ -41,13 +41,15 @@ def single_tube(argv):
     graph_dyn = TGraphErrors()
     graph_mcp = TGraphErrors()
 
+    dyn_arr, mcp_arr = [[] for i in range(7)], [[] for i in range(7)]
+
     nnvt_num, ham_num = 0, 0
 
     """ loop all files and generate pdf output """
-    for idx, afile in enumerate(allFiles[0:100]):
+    for idx, afile in enumerate(allFiles):
         print("Processing scan file No {:d} -> {} " .format(idx, afile))
-        #data1 = pd.read_csv(afile, header=[0], nrows=24, sep="\s+")  ## TTS
-        data1 = pd.read_csv(afile, header=[25], nrows=24, sep='\s+') ## TT
+        data1 = pd.read_csv(afile, header=[0], nrows=24, sep="\s+")  ## TTS
+        #data1 = pd.read_csv(afile, header=[25], nrows=24, sep='\s+') ## TT
 
         graph_dyn.Set(0)
         graph_mcp.Set(0)
@@ -62,6 +64,10 @@ def single_tube(argv):
             nnvt_num += 1
             
             """ average phi direction """
+            for itheta in range(7):
+                for iphi in range(24):
+                    #print(float(np.array(data1.iloc[iphi, itheta+1])))
+                    mcp_arr[itheta].append( float(np.array(data1.iloc[iphi, itheta+1])) )
             #for itheta in range(1, 8):
             #    mean = np.array(data1.iloc[::, itheta]).mean()
             #    sigma = np.std( np.array(data1.iloc[::, itheta]) )
@@ -69,16 +75,21 @@ def single_tube(argv):
             #    graph_mcp.SetPointError(itheta-1, 0, sigma)
             
             """average theta direction"""
+            """
             for iphi in range(24):
                 mean = np.array(data1.iloc[iphi, 1:8]).mean()
                 sigma = np.std(np.array(data1.iloc[iphi, 1:8]))
                 graph_mcp.SetPoint(iphi, iphi*15, mean)
                 graph_mcp.SetPointError(iphi, 0, sigma)
             #plt.plot(graph_mcp.GetX(), graph_mcp.GetY(), "o-", ms=3)
+            """
 
         elif scanid in ham_id:
             print("It's a Dynode PMT !!!")
             ham_num += 1
+            for itheta in range(7):
+                for iphi in range(24):
+                    dyn_arr[itheta].append( float(np.array(data1.iloc[iphi, itheta+1])) )
             """ average phi direction """
             #for itheta in range(1, 8):
             #    mean = np.array(data1.iloc[::, itheta]).mean()
@@ -86,18 +97,52 @@ def single_tube(argv):
             #    print("It's a Dynode PMT !!!")
             #    graph_dyn.SetPoint(itheta-1, itheta, mean)
             #    graph_dyn.SetPointError(itheta-1, 0, sigma)
+
             """average theta direction"""
+            """
             for iphi in range(24):
                 mean = np.array(data1.iloc[iphi, 1:8]).mean()
                 sigma = np.std(np.array(data1.iloc[iphi, 1:8]))
                 graph_dyn.SetPoint(iphi, iphi*15, mean)
                 graph_dyn.SetPointError(iphi, 0, sigma)
             plt.plot(graph_dyn.GetX(), graph_dyn.GetY(), "o-", ms=3)
+            """
 
-    plt.title("Dyn PMT average all theta")
-    plt.xlabel("phi")
-    plt.ylabel("hittime/ns")
-    plt.savefig(argv[1])
+    dyn_pos = [13, 28, 41, 55, 66, 79, 85]
+    mcp_pos = [14, 30, 42.5, 55, 67, 77.5, 85]
+
+    def draw_plot(data, pos, edge_color, fill_color): 
+        bp = ax.boxplot(data, positions=pos, patch_artist=True, sym="") 
+
+        for element in ['boxes', 'whiskers', 'fliers', 'means', 'medians', 'caps']: 
+            plt.setp(bp[element], color=edge_color) 
+
+        for patch in bp['boxes']: 
+            patch.set(facecolor=fill_color)  
+
+        return bp
+
+    fig, ax = plt.subplots() 
+    bp1 = draw_plot(dyn_arr, dyn_pos, 'red', 'tan') 
+    bp2 = draw_plot(mcp_arr, mcp_pos, 'blue', 'cyan') 
+    ax.set_ylim(0, 10) 
+    ax.legend([bp1["boxes"][0], bp2["boxes"][0]], ["dynode", "mcp"], loc='best')
+    ax.set_xlabel("theta/deg")
+    ax.set_ylabel("TTS mean/ns")
+    plt.show() 
+
+    #plt.violinplot(dyn_arr, dyn_pos, points=1000, widths=0.8, showmeans=True, showextrema=True, showmedians=True)
+    #plt.violinplot(mcp_arr, mcp_pos, points=1, widths=0.3, showmeans=True, showextrema=True, showmedians=True)
+
+    #plt.violinplot(, pos, points=20, widths=0.3,
+    #                  showmeans=True, showextrema=True, showmedians=True)
+    #plt.set_title('Custom violinplot 1', fontsize=fs)
+
+    #plt.title("Dyn PMT average all theta")
+    #plt.xlabel("phi")
+    #plt.ylabel("hittime/ns")
+    #plt.show()
+    #plt.savefig(argv[1])
 
     print(" Dynode PMT Number: %d" % ham_num)
     print(" MCP PMT Number: %d" % nnvt_num)
@@ -121,8 +166,11 @@ def write_root(argv):
     # fill graph
     #hist_dyn = [TH2D("dyn%d"%i, "", 24, -7.5, 360-7.5, 100, 0, 1000) for i in range(7) ]
     #hist_nnvt = [TH2D("nnvt%d"%i, "", 24, -7.5, 360-7.5, 100, 0, 1000)  for i in range(7) ]
-    hist_dyn = [TH1D("dyn%d"%i, "", 200, 300, 500) for i in range(7) ]
-    hist_nnvt = [TH1D("nnvt%d"%i, "", 200, 300, 500)  for i in range(7) ]
+    hist_dyn = [TH1D("dyn%d"%i, "", 100, 0, 100) for i in range(7) ]
+    hist_nnvt = [TH1D("nnvt%d"%i, "", 100, 0, 100)  for i in range(7) ]
+    hist_dyn0 = TH1D("dyn0", "", 100, 0, 10)
+    hist_dyn6 = TH1D("dyn6", "", 100, 0, 10)
+    hist_mcp0 = TH1D("mcp0", "", 100, 0, 10)
     hist_dyn_phi = [ TH1D("dynPhi%d"%i, "", 200, 300, 500) for i in range(24) ]
     hist_mcp_phi = [TH1D("nnvtPhi%d"%i, "", 200, 300, 500) for i in range(24) ]
     hist_mcp_all = TH1D("nnvtall","", 200, 0, 1000)
@@ -137,8 +185,8 @@ def write_root(argv):
     """ loop all files and generate pdf output """
     for idx, afile in enumerate(allFiles):
         print("Processing scan file No {:d} -> {} " .format(idx, afile))
-        #data1 = pd.read_csv(afile, header=[0], nrows=24, sep="\s+")  ## TTS 
-        data1 = pd.read_csv(afile, header=[25], nrows=24, sep='\s+') ## TT
+        data1 = pd.read_csv(afile, header=[0], nrows=24, sep="\s+")  ## TTS 
+        #data1 = pd.read_csv(afile, header=[25], nrows=24, sep='\s+') ## TT
 
         """ seperate MCP and Dynode PMTs """
         #scanid = int(re.sub("\D", "", afile))
@@ -148,26 +196,29 @@ def write_root(argv):
             print("It's a MCP PMT !!!")
             nnvt_num += 1
             for idd, angle in enumerate(np.array(data1["angle"])):
-                for col in range(1, 8):
+                hist_mcp0.Fill(np.array(data1.iloc[idd, 1]))
+                #for col in range(1, 8):
                     #if np.array(data1.iloc[idd, col]) < 200000:
-                    hist_mcp_all.Fill(np.array(data1.iloc[idd, col]))
-                    if np.array(data1.iloc[idd, col]) > 380 and np.array(data1.iloc[idd, col]) <460:
-                        hist_nnvt[col-1].Fill(np.array(data1.iloc[idd, col]))
-                        hist_mcp_phi[idd].Fill(np.array(data1.iloc[idd, col]))
-                        hist2d_nnvt.Fill(col, np.array(data1.iloc[idd, col]))
+                    #hist_mcp_all.Fill(np.array(data1.iloc[idd, col]))
+                    #if np.array(data1.iloc[idd, col]) > 380 and np.array(data1.iloc[idd, col]) <460:
+                        #hist_nnvt[col-1].Fill(np.array(data1.iloc[idd, col]))
+                        #hist_mcp_phi[idd].Fill(np.array(data1.iloc[idd, col]))
+                        #hist2d_nnvt.Fill(col, np.array(data1.iloc[idd, col]))
                         #hist_nnvt[col-1].Fill(angle, np.array(data1.iloc[idd, col]) )
                     #prof_nnvt[col-1].Fill(angle, np.array(data1.iloc[idd, col]) )
         elif scanid in ham_id:
             ham_num += 1
             print("It's a Dynode PMT !!!")
-            for idd, angle in enumerate(np.array(data1["angle"])):
-                for col in range(1, 8):
-                    hist_dyn_all.Fill(np.array(data1.iloc[idd, col]))
+            #for idd, angle in enumerate(np.array(data1["angle"])):
+                #hist_dyn0.Fill(np.array(data1.iloc[idd, 1]))
+                #hist_dyn6.Fill(np.array(data1.iloc[idd, 7])-np.array(data1.iloc[idd, 1]))
+                #for col in range(1, 8):
+                    #hist_dyn_all.Fill(np.array(data1.iloc[idd, col]))
                     #if np.array(data1.iloc[idd, col]) < 200000:
-                    if np.array(data1.iloc[idd, col]) > 360 and np.array(data1.iloc[idd, col]) < 440:  # cut for station2 hittime test ...
-                        hist_dyn[col-1].Fill(np.array(data1.iloc[idd, col]))
-                        hist2d_dyn.Fill(col, np.array(data1.iloc[idd, col]))
-                        hist_dyn_phi[idd].Fill(np.array(data1.iloc[idd, col]))
+                    #if np.array(data1.iloc[idd, col]) > 360 and np.array(data1.iloc[idd, col]) < 440:  # cut for station2 hittime test ...
+                        #hist_dyn[col-1].Fill(np.array(data1.iloc[idd, col]))
+                        #hist2d_dyn.Fill(col, np.array(data1.iloc[idd, col]))
+                        #hist_dyn_phi[idd].Fill(np.array(data1.iloc[idd, col]))
                     #hist_dyn[col-1].Fill(angle, np.array(data1.iloc[idd, col]) )
                     #prof_dyn[col-1].Fill(angle, np.array(data1.iloc[idd, col]) )
 
@@ -176,6 +227,9 @@ def write_root(argv):
  
 
     out = TFile(argv[1], "recreate")
+    hist_mcp0.Write()
+    
+    """
     hist2d_dyn.Write()
     hist2d_nnvt.Write()
     hist_mcp_all.Write()
@@ -188,6 +242,7 @@ def write_root(argv):
     for j in range(24):
         hist_dyn_phi[j].Write()
         hist_mcp_phi[j].Write()
+    """
     out.Close()
 
 
@@ -257,30 +312,37 @@ def interpolate(argv):
         dyn_err.append(h_dyn.GetStdDev())
         mcp_err.append(h_mcp.GetStdDev())
     mcp_arr.insert(0, mcp_arr[0])
-    mcp_arr.append(mcp_arr[-1])
-    
-    oldx_mcp = [0, 14, 30, 42.5, 55, 67, 77.5, 85, 90]
-    ipo3 = spi.splrep(oldx_mcp, mcp_arr, k=2)
-    newx = [i for i in range(0, 90)]
-    iy3 = spi.splev(newx, ipo3)
-    """
-    from ROOT import TF1, TGraphErrors
-    gMCP_tts = TGraphErrors()
-    index = 0
-    for x, y in zip(oldx_mcp, mcp_arr):
-        gMCP_tts.SetPoint(index, x, y); index+=1
-    ff = TF1("f1", "[0]+[1]*x+[2]*x*x+[3]*x*x*x", 0, 90)
-    gMCP_tts.Fit(ff, "R")
-    cc = TCanvas()
-    gMCP_tts.Draw("APL")
-    cc.SaveAs("Fit.pdf")
-    """
-    plt.plot(oldx_mcp, mcp_arr, "o-", ms=4, color="blue", label="data")
-    #plt.plot(newx, iy3, "-", color="salmon", label="interpolation")
+    mcp_err.insert(0, mcp_err[0])
+
+    mcp_arr = np.sqrt(np.array(mcp_arr)**2-2.1**2)
+
+
+    def func(x, a, b, c):
+        return a+b*x+c*x*x
+
+    from scipy.optimize import curve_fit
+
+    mcp_pos = [0, 14, 30, 42.5, 55, 67, 77.5, 85]
+    popt, pcov = curve_fit(func, mcp_pos, mcp_arr)
+    xdata = [i for i in range(90)]
+    plt.errorbar(mcp_pos, mcp_arr, yerr=mcp_err, fmt="o-", ms=5, color="blue", label="data")
+    plt.plot(xdata, func(np.array(xdata), *popt), "-", lw=2, color="salmon", label="fitting")
     plt.legend()
     plt.xlabel("theta")
     plt.ylabel("TTS")
-    plt.show()
+    plt.savefig("MCP_TTS_fitting.pdf")
+
+
+def generate_dynode_tts():
+    infile = TFile("dynode_led0.root", "read")
+    hled0 = infile.Get("dyn0")
+    generated_tts = []
+    for i in range(5000):
+        generated_tts.append(hled0.GetRandom())
+    return generated_tts
+
+
+
 
 
 if __name__ == "__main__":
@@ -290,6 +352,6 @@ if __name__ == "__main__":
     #re_analysis(sys.argv)
     #single_tube(sys.argv)
     interpolate(sys.argv)
-    
+    #generate_dynode_tts()
         
 
