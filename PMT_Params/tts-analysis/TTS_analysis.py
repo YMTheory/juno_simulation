@@ -342,7 +342,21 @@ def generate_dynode_tts():
     return generated_tts
 
 
+def generate_mcp_tts():
+    infile = TFile("mcp_led0.root", "read")
+    hled0 = infile.Get("mcp0")
+    generate_tts = []
+    for i in range(12612):
+        generate_tts.append(hled0.GetRandom())
+    return generate_tts
 
+def save_sampling(arr1, arr2):
+    with open("sampled_dynode.txt", "w") as f:
+        for elem in arr1:
+            f.write("{}\n".format(elem))
+    with open("sampled_mcp.txt", "w") as f:
+        for elem in arr2:
+            f.write("{}\n".format(elem))
 
 
 if __name__ == "__main__":
@@ -351,7 +365,7 @@ if __name__ == "__main__":
     #write_root(sys.argv)
     #re_analysis(sys.argv)
     #single_tube(sys.argv)
-    interpolate(sys.argv)
+    #interpolate(sys.argv)
     #generate_dynode_tts()
-        
+    save_sampling(np.array(generate_dynode_tts()), np.array(generate_mcp_tts()))
 
