@@ -67,7 +67,8 @@ def single_tube(argv):
             for itheta in range(7):
                 for iphi in range(24):
                     #print(float(np.array(data1.iloc[iphi, itheta+1])))
-                    mcp_arr[itheta].append( float(np.array(data1.iloc[iphi, itheta+1])) )
+                    #mcp_arr[itheta].append( float(np.array(data1.iloc[iphi, itheta+1])) )
+                    mcp_arr[itheta].append( np.sqrt(float(np.array(data1.iloc[iphi, itheta+1]))**2-2.1**2) )
             #for itheta in range(1, 8):
             #    mean = np.array(data1.iloc[::, itheta]).mean()
             #    sigma = np.std( np.array(data1.iloc[::, itheta]) )
@@ -89,7 +90,7 @@ def single_tube(argv):
             ham_num += 1
             for itheta in range(7):
                 for iphi in range(24):
-                    dyn_arr[itheta].append( float(np.array(data1.iloc[iphi, itheta+1])) )
+                    dyn_arr[itheta].append( np.sqrt(float(np.array(data1.iloc[iphi, itheta+1]))**2-2.1**2) )
             """ average phi direction """
             #for itheta in range(1, 8):
             #    mean = np.array(data1.iloc[::, itheta]).mean()
@@ -111,6 +112,10 @@ def single_tube(argv):
     dyn_pos = [13, 28, 41, 55, 66, 79, 85]
     mcp_pos = [14, 30, 42.5, 55, 67, 77.5, 85]
 
+    dyn_pos = [1, 2, 3, 4, 5, 6, 7]
+
+    print([np.array(dyn_arr[i]).mean() for i in range(7)])
+
     def draw_plot(data, pos, edge_color, fill_color): 
         bp = ax.boxplot(data, positions=pos, patch_artist=True, sym="") 
 
@@ -124,7 +129,7 @@ def single_tube(argv):
 
     fig, ax = plt.subplots() 
     bp1 = draw_plot(dyn_arr, dyn_pos, 'red', 'tan') 
-    bp2 = draw_plot(mcp_arr, mcp_pos, 'blue', 'cyan') 
+    bp2 = draw_plot(mcp_arr, dyn_pos, 'blue', 'cyan') 
     ax.set_ylim(0, 10) 
     ax.legend([bp1["boxes"][0], bp2["boxes"][0]], ["dynode", "mcp"], loc='best')
     ax.set_xlabel("theta/deg")
@@ -168,9 +173,9 @@ def write_root(argv):
     #hist_nnvt = [TH2D("nnvt%d"%i, "", 24, -7.5, 360-7.5, 100, 0, 1000)  for i in range(7) ]
     hist_dyn = [TH1D("dyn%d"%i, "", 100, 0, 100) for i in range(7) ]
     hist_nnvt = [TH1D("nnvt%d"%i, "", 100, 0, 100)  for i in range(7) ]
-    hist_dyn0 = TH1D("dyn0", "", 100, 0, 10)
-    hist_dyn6 = TH1D("dyn6", "", 100, 0, 10)
-    hist_mcp0 = TH1D("mcp0", "", 100, 0, 10)
+    hist_dyn0 = TH1D("dyn0", "", 200, 0, 40)
+    hist_dyn6 = TH1D("dyn6", "", 200, -10, 30)
+    hist_mcp0 = TH1D("mcp0", "", 200, 0, 40)
     hist_dyn_phi = [ TH1D("dynPhi%d"%i, "", 200, 300, 500) for i in range(24) ]
     hist_mcp_phi = [TH1D("nnvtPhi%d"%i, "", 200, 300, 500) for i in range(24) ]
     hist_mcp_all = TH1D("nnvtall","", 200, 0, 1000)
@@ -196,7 +201,7 @@ def write_root(argv):
             print("It's a MCP PMT !!!")
             nnvt_num += 1
             for idd, angle in enumerate(np.array(data1["angle"])):
-                hist_mcp0.Fill(np.array(data1.iloc[idd, 1]))
+                hist_mcp0.Fill(np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
                 #for col in range(1, 8):
                     #if np.array(data1.iloc[idd, col]) < 200000:
                     #hist_mcp_all.Fill(np.array(data1.iloc[idd, col]))
@@ -209,8 +214,10 @@ def write_root(argv):
         elif scanid in ham_id:
             ham_num += 1
             print("It's a Dynode PMT !!!")
-            #for idd, angle in enumerate(np.array(data1["angle"])):
-                #hist_dyn0.Fill(np.array(data1.iloc[idd, 1]))
+            for idd, angle in enumerate(np.array(data1["angle"])):
+                hist_dyn0.Fill(np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
+                hist_dyn6.Fill(np.sqrt(np.array(data1.iloc[idd, 7])**2-2.1**2)-np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
+
                 #hist_dyn6.Fill(np.array(data1.iloc[idd, 7])-np.array(data1.iloc[idd, 1]))
                 #for col in range(1, 8):
                     #hist_dyn_all.Fill(np.array(data1.iloc[idd, col]))
@@ -228,6 +235,8 @@ def write_root(argv):
 
     out = TFile(argv[1], "recreate")
     hist_mcp0.Write()
+    hist_dyn0.Write()
+    hist_dyn6.Write()
     
     """
     hist2d_dyn.Write()
@@ -275,24 +284,25 @@ def re_analysis(argv):
         dyn_phi_err.append(h_dyn.GetStdDev())
         mcp_phi_err.append(h_mcp.GetStdDev())
 
-    """
-    plt.plot([i for i in range(1, 8)], np.array(dyn_arr)-dyn_arr[0], "o-", color="blue", label="dynode")
-    plt.plot([i for i in range(1, 8)], np.array(mcp_arr)-dyn_arr[0], "s-", color="hotpink", label="mcp")
-    #plt.errorbar([i for i in range(1, 8)], np.sqrt(np.array(dyn_arr)**2-2.10**2), yerr=dyn_err, fmt="o-", color="blue", label="dynode")
-    #plt.errorbar([i for i in range(1, 8)], np.sqrt(np.array(mcp_arr)**2-2.10**2), yerr=mcp_err, fmt="s-", color="hotpink", label="mcp")
+    
+    #plt.plot([i for i in range(1, 8)], np.array(dyn_arr)-dyn_arr[0], "o-", color="blue", label="dynode")
+    #plt.plot([i for i in range(1, 8)], np.array(mcp_arr)-mcp_arr[0], "s-", color="hotpink", label="mcp")
+    plt.errorbar([i for i in range(1, 8)], np.sqrt(np.array(dyn_arr)**2-2.10**2), yerr=dyn_err, fmt="o-", color="blue", label="dynode")
+    plt.errorbar([i for i in range(1, 8)], np.sqrt(np.array(mcp_arr)**2-2.10**2), yerr=mcp_err, fmt="s-", color="hotpink", label="mcp")
     plt.legend()
     plt.xlabel("led No.")
-    plt.ylabel("relative hittime mean/ns")
-    plt.savefig("hittime_theta.pdf")
+    plt.ylabel("TTS mean/ns")
+    #plt.savefig("hittime_theta.pdf")
+    plt.show()
 
     """
     plt.plot([i*15 for i in range(24)], np.sqrt(np.array(dyn_phi)**2)-dyn_phi[0], "o-", color="blue", label="dynode")
-    plt.plot([i*15 for i in range(24)], np.sqrt(np.array(mcp_phi)**2)-dyn_phi[0], "s-", color="hotpink", label="mcp")
+    plt.plot([i*15 for i in range(24)], np.sqrt(np.array(mcp_phi)**2)-mcp_phi[0], "s-", color="hotpink", label="mcp")
     plt.legend()
     plt.xlabel("phi")
     plt.ylabel("hittime mean/ns")
     plt.savefig("hittime_phi.pdf")
-
+    """
 
 def interpolate(argv):
     import scipy.interpolate as spi
@@ -324,17 +334,19 @@ def interpolate(argv):
 
     mcp_pos = [0, 14, 30, 42.5, 55, 67, 77.5, 85]
     popt, pcov = curve_fit(func, mcp_pos, mcp_arr)
+    print(popt)
     xdata = [i for i in range(90)]
     plt.errorbar(mcp_pos, mcp_arr, yerr=mcp_err, fmt="o-", ms=5, color="blue", label="data")
     plt.plot(xdata, func(np.array(xdata), *popt), "-", lw=2, color="salmon", label="fitting")
     plt.legend()
     plt.xlabel("theta")
     plt.ylabel("TTS")
-    plt.savefig("MCP_TTS_fitting.pdf")
+    plt.show()
+    #plt.savefig("MCP_TTS_fitting.pdf")
 
 
 def generate_dynode_tts():
-    infile = TFile("dynode_led0.root", "read")
+    infile = TFile("tts_led0.root", "read")
     hled0 = infile.Get("dyn0")
     generated_tts = []
     for i in range(5000):
@@ -343,7 +355,7 @@ def generate_dynode_tts():
 
 
 def generate_mcp_tts():
-    infile = TFile("mcp_led0.root", "read")
+    infile = TFile("tts_led0.root", "read")
     hled0 = infile.Get("mcp0")
     generate_tts = []
     for i in range(12612):
@@ -363,9 +375,19 @@ if __name__ == "__main__":
     """ Need 2 parameters: first for PMT type(0 for dyn, 1 for nnvt), second is the output file name """
     #write_pdf(sys.argv)
     #write_root(sys.argv)
-    #re_analysis(sys.argv)
+    re_analysis(sys.argv)
     #single_tube(sys.argv)
     #interpolate(sys.argv)
-    #generate_dynode_tts()
-    save_sampling(np.array(generate_dynode_tts()), np.array(generate_mcp_tts()))
+    """
+    dyn_tts = generate_dynode_tts()
+    mcp_tts = generate_mcp_tts()
+    with open("dynode_tts_sampled.csv", "w") as f:
+        for elem in dyn_tts:
+            f.write(str(elem)+"\n")
+    with open("mcp_tts_sampled.csv", "w") as f:
+        for elem in mcp_tts:
+            f.write(str(elem)+"\n")
+    """
+
+    #save_sampling(np.array(generate_dynode_tts()), np.array(generate_mcp_tts()))
 
