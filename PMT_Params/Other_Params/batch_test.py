@@ -184,6 +184,12 @@ def gen_hqmcpID(dyn_id, lqmcp_id):
     return hqmcp_id
 
 
+def read_pmtPos():
+    df = pd.read_csv("PMTPos_Acrylic_with_chimney.csv", sep=" ")
+    return df["x"].to_numpy(), df["y"].to_numpy(), df["z"].to_numpy()
+
+
+
 if __name__ == "__main__" :
 
 
@@ -208,15 +214,16 @@ if __name__ == "__main__" :
 
     plt.style.use("bmh")
     
+
     """ read from xlxs --> new test data """
     df = read_file()
     
     # dynode
-    sn1 = faked_sn(0) 
+    sn1_fake = faked_sn(0) 
     dyn_id = read_dynID(); print(len(dyn_id))
     #gain1, rsl1, pde1, dcr1 = sample_pmt(df, 0, False, 5)
-    sn1_more, gain1, rsl1, pde1, dcr1, tts1, amp1, hv1, pvsv1, svsn1, riset1, fallt1, fwhm1 = sample_pmt(df, 0, False, 5)
-    sn1.extend(sn1_more)
+    sn1_origin, gain1, rsl1, pde1, dcr1, tts1, amp1, hv1, pvsv1, svsn1, riset1, fallt1, fwhm1 = sample_pmt(df, 0, False, 5)
+    sn1 = np.concatenate((sn1_origin, np.array(sn1_fake)) )
     isDyn1 = [1 for i in range(len(dyn_id))]
     isHqe1 = [0 for i in range(len(dyn_id))]
 
@@ -230,10 +237,10 @@ if __name__ == "__main__" :
 
 
     # hqmcp
-    sn3 = faked_sn(1) 
+    sn3_fake = faked_sn(1) 
     #gain3, rsl3, pde3, dcr3 = sample_pmt(df, 1, True, 3456)
-    sn3_more, gain3, rsl3, pde3, dcr3, tts3, amp3, hv3, pvsv3, svsn3, riset3, fallt3, fwhm3 = sample_pmt(df, 1, True, 3456)
-    sn3.extend(sn3_more)
+    sn3_origin, gain3, rsl3, pde3, dcr3, tts3, amp3, hv3, pvsv3, svsn3, riset3, fallt3, fwhm3 = sample_pmt(df, 1, True, 3456)
+    sn3 = np.concatenate((sn3_origin, np.array(sn3_fake)) )
     pmt_id = [i for i in range(17612) ]
     hqmcp_id = gen_hqmcpID(dyn_id, lqmcp_id); print(len(hqmcp_id))
     isDyn3 = [0 for i in range(len(hqmcp_id ))]
@@ -252,7 +259,7 @@ if __name__ == "__main__" :
             line = lines.strip("\n")
             tts_ss_mcp.append(float(line))
 
-    infile = uproot.open("PmtData.root") 
+    infile = up.open("PmtData.root") 
     toff = infile["PmtData"].array("timeOffset")
     app = infile["PmtData"].array("afterPulseProb")
     ppp = infile["PmtData"].array('prePulseProb')
@@ -263,11 +270,13 @@ if __name__ == "__main__" :
     dcr_final, hv_final, pvsv_final, svsn_final = [], [], [], []
     amp_final, riset_final, fallt_final, fwhm_final = [], [], [], []
     tts_ss_final, toff_final, app_final, ppp_final = [], [], [], []
+    pmtx_final, pmty_final, pmtz_final = read_pmtPos()
 
 
     num = 0
     print(np.array(pde2).shape)
     for i in range(17612):
+        toff_final.append(toff[i]); ppp_final.append(ppp[i]); app_final.append(app[i])
         if i in dyn_id:
             idx = dyn_id.index(i)
             idx_final.append(dyn_id[idx])
@@ -301,54 +310,18 @@ if __name__ == "__main__" :
     datadict = {"index": idx_final, "SN": sn_final, "isDyn": isDyn_final, "isHqe": isHqe_final, 
                 "gain": gain_final, "resolution": rsl_final, "dcr": dcr_final, "pde": pde_final,
                 "tts": tts_final, "amplitude": amp_final, "HV": hv_final, "PvsV": pvsv_final,
-                "SvsN": svsn_final, "risetime": riset_final, "falltime": fallt_final, "fwhm": fwhm_final, "tts_ss": tts_ss_final}
+                "SvsN": svsn_final, "risetime": riset_final, "falltime": fallt_final, "fwhm": fwhm_final, 
+                "tts_ss": tts_ss_final, "timeoffset": toff_final, "prePulseProb": ppp_final, 
+                "afterPulseProb": app_final, "pmtx": pmtx_final, "pmty": pmty_final, "pmtz":pmtz_final}
+
+    #datadict = {"index": idx_final, "SN": sn_final, "isDyn": isDyn_final, "isHqe": isHqe_final}
     datadf = pd.DataFrame(datadict)
-    datadf.to_csv("PmtData.csv")
-
-
+    datadf.to_csv("PmtData_copy.csv")
 
     """
-    # generate PmtData.root
-    b1 = up.newbranch("i8", compression=up.ZLIB(4))
-    b2 = up.newbranch("i8", compression=up.ZLIB(4))
-    b3 = up.newbranch("i8", compression=up.ZLIB(4))
-    b4 = up.newbranch("f8", compression=up.ZLIB(4))
-    b5 = up.newbranch("f8", compression=up.ZLIB(4))
-    b6 = up.newbranch("f8", compression=up.ZLIB(4))
-    b7 = up.newbranch("f8", compression=up.ZLIB(4))
-    b8 = up.newbranch("f8", compression=up.ZLIB(4))
-    b9 = up.newbranch("f8", compression=up.ZLIB(4))
-    b10 = up.newbranch("f8", compression=up.ZLIB(4))
-    b11 = up.newbranch("f8", compression=up.ZLIB(4))
-    b12 = up.newbranch("f8", compression=up.ZLIB(4))
-    b13 = up.newbranch("f8", compression=up.ZLIB(4))
-    b14 = up.newbranch("f8", compression=up.ZLIB(4))
-    b15 = up.newbranch("f8", compression=up.ZLIB(4))
-    b16 = up.newbranch("S10")
 
-
-    branchdict = {"pmtid": b1,  "isDyn": b2, "isHqe": b3, "pde": b4, "gain": b5, 
-                  "resolution": b6, "dcr": b7, "tts": b8, "amp":b9, "hv":b10, 
-                  "risetime": b11, "falltime": b12, "fwhm":b13, "pvsv": b14, "svsn": b15, "sn": b16}  
-    tree = up.newtree(branchdict, compression=up.LZ4(4))
-    with up.recreate("sample_params.root") as f:
-        f["PmtData"] = tree
-        #f["PmtData"].extend({"pmtid": idx_final, "isDyn": isDyn_final, "isHqe": isHqe_final, "pde": pde_final} )
-        f["PmtData"].extend({"pmtid": idx_final, "isDyn": isDyn_final, "isHqe": isHqe_final, "pde": pde_final, 
-                              "gain": gain_final, "resolution": rsl_final, "dcr": dcr_final, "tts": tts_final, 
-                              "amp": amp_final, "hv": hv_final, "risetime":riset_final, "falltime":fallt_final ,
-                              "pvsv": pvsv_final, "svsn": svsn_final, "fwhm": fwhm_final})
-
+    
+    read_pmtPos()
 
     """
-    #f = h5py.File("pmt_data.h5",'w')
-    #grp1 = f.create_group("dynode")
-    #grp1.create_dataset("/dynode/dcr", data=dcr2)
-    #grp1.create_dataset("dynode/pde", data=pde2)
-    #grp1.create_dataset("dynode/sn", data=sn2)
-    #grp2 = f.create_group("lqmcp")
-    #grp3 = f.create_group("hqmcp")
-
-
-
 
