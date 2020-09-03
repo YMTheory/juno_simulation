@@ -200,8 +200,9 @@ def write_root(argv):
         if scanid in nnvt_id:
             print("It's a MCP PMT !!!")
             nnvt_num += 1
-            for idd, angle in enumerate(np.array(data1["angle"])):
-                hist_mcp0.Fill(np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
+            hist_mcp0.Fill( (np.sqrt(np.array(data1.iloc[0:24, 1])**2-2.1**2)).mean()  )
+            #for idd, angle in enumerate(np.array(data1["angle"])):
+                #hist_mcp0.Fill(np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
                 #for col in range(1, 8):
                     #if np.array(data1.iloc[idd, col]) < 200000:
                     #hist_mcp_all.Fill(np.array(data1.iloc[idd, col]))
@@ -214,9 +215,11 @@ def write_root(argv):
         elif scanid in ham_id:
             ham_num += 1
             print("It's a Dynode PMT !!!")
-            for idd, angle in enumerate(np.array(data1["angle"])):
-                hist_dyn0.Fill(np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
-                hist_dyn6.Fill(np.sqrt(np.array(data1.iloc[idd, 7])**2-2.1**2)-np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
+            hist_dyn0.Fill( (np.sqrt(np.array(data1.iloc[0:24, 1])**2-2.1**2)).mean()  )
+            hist_dyn6.Fill( (np.sqrt(np.array(data1.iloc[0:24, 7])**2-2.1**2)).mean()  )
+            #for idd, angle in enumerate(np.array(data1["angle"])):
+                #hist_dyn0.Fill(np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
+                #hist_dyn6.Fill(np.sqrt(np.array(data1.iloc[idd, 7])**2-2.1**2)-np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
 
                 #hist_dyn6.Fill(np.array(data1.iloc[idd, 7])-np.array(data1.iloc[idd, 1]))
                 #for col in range(1, 8):
@@ -346,21 +349,33 @@ def interpolate(argv):
 
 
 def generate_dynode_tts():
-    infile = TFile("tts_led0.root", "read")
+    infile = TFile("tts_led0+6_averagePhi.root", "read")
     hled0 = infile.Get("dyn0")
     generated_tts = []
-    for i in range(5000):
-        generated_tts.append(hled0.GetRandom())
+    num = 0
+    while num<5000:
+        tmp_tts = hled0.GetRandom()
+        if (0.0 < tmp_tts < 6.0):
+            generated_tts.append(tmp_tts)
+            num+=1
+        else:
+            continue
     return generated_tts
 
 
 def generate_mcp_tts():
-    infile = TFile("tts_led0.root", "read")
+    infile = TFile("tts_led0+6_averagePhi.root", "read")
     hled0 = infile.Get("mcp0")
-    generate_tts = []
-    for i in range(12612):
-        generate_tts.append(hled0.GetRandom())
-    return generate_tts
+    generated_tts = []
+    num = 0
+    while num<12617:
+        tmp_tts = hled0.GetRandom()
+        if (0.0 < tmp_tts < 15):
+            generated_tts.append(tmp_tts)
+            num+=1
+        else:
+            continue
+    return generated_tts
 
 def save_sampling(arr1, arr2):
     with open("sampled_dynode.txt", "w") as f:
@@ -375,19 +390,20 @@ if __name__ == "__main__":
     """ Need 2 parameters: first for PMT type(0 for dyn, 1 for nnvt), second is the output file name """
     #write_pdf(sys.argv)
     #write_root(sys.argv)
-    re_analysis(sys.argv)
+    #re_analysis(sys.argv)
     #single_tube(sys.argv)
     #interpolate(sys.argv)
-    """
+    
+   
     dyn_tts = generate_dynode_tts()
     mcp_tts = generate_mcp_tts()
-    with open("dynode_tts_sampled.csv", "w") as f:
+    with open("dynode_tts_sampled_averagePhi.csv", "w") as f:
         for elem in dyn_tts:
             f.write(str(elem)+"\n")
-    with open("mcp_tts_sampled.csv", "w") as f:
+    with open("mcp_tts_sampled_averagePhi.csv", "w") as f:
         for elem in mcp_tts:
             f.write(str(elem)+"\n")
-    """
+    
 
     #save_sampling(np.array(generate_dynode_tts()), np.array(generate_mcp_tts()))
 
