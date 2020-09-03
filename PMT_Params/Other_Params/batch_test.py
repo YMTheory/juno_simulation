@@ -4,7 +4,7 @@
 import pandas as pd
 from ROOT import TH2D, TH1D, TFile, TRandom, TTree
 import ROOT
-import h5py
+#import h5py
 import uproot as up
 import pdb
 import numpy as np
@@ -247,14 +247,14 @@ if __name__ == "__main__" :
     isHqe3 = [1 for i in range(len(hqmcp_id)) ]
 
     tts_ss_dyn = []
-    with open("dynode_tts_sampled.csv") as f:
+    with open("dynode_tts_sampled_averagePhi.csv") as f:
         for lines in f.readlines():
             line = lines.strip("\n")
             tts_ss_dyn.append(float(line))
     
 
     tts_ss_mcp, tts_ss_lqmcp, tts_ss_hqmcp = [], [], []
-    with open("mcp_tts_sampled.csv") as f:
+    with open("mcp_tts_sampled_averagePhi.csv") as f:
         for lines in f.readlines():
             line = lines.strip("\n")
             tts_ss_mcp.append(float(line))
@@ -307,16 +307,16 @@ if __name__ == "__main__" :
             continue
 
 
-    datadict = {"index": idx_final, "SN": sn_final, "isDyn": isDyn_final, "isHqe": isHqe_final, 
-                "gain": gain_final, "resolution": rsl_final, "dcr": dcr_final, "pde": pde_final,
-                "tts": tts_final, "amplitude": amp_final, "HV": hv_final, "PvsV": pvsv_final,
-                "SvsN": svsn_final, "risetime": riset_final, "falltime": fallt_final, "fwhm": fwhm_final, 
-                "tts_ss": tts_ss_final, "timeoffset": toff_final, "prePulseProb": ppp_final, 
-                "afterPulseProb": app_final, "pmtx": pmtx_final, "pmty": pmty_final, "pmtz":pmtz_final}
+    datadict = {"pmtID": idx_final, "SN": sn_final, "MCP_Hama": isDyn_final, "HiQE_MCP": isHqe_final, 
+                "Gain": gain_final, "Resolution": rsl_final, "DCR": dcr_final, "PDE": pde_final,
+                "TTS": tts_final, "Amplitude": amp_final, "HV": hv_final, "PvsV": pvsv_final,
+                "SvsN": svsn_final, "Risetime": riset_final, "Falltime": fallt_final, "FWHM": fwhm_final, 
+                "TTS_SS": tts_ss_final, "timeOffset": toff_final, "prePulseProb": ppp_final, 
+                "afterPulseProb": app_final, "pmtPosX": pmtx_final, "pmtPosY": pmty_final, "pmtPosZ":pmtz_final}
 
     #datadict = {"index": idx_final, "SN": sn_final, "isDyn": isDyn_final, "isHqe": isHqe_final}
     datadf = pd.DataFrame(datadict)
-    datadf.to_csv("PmtData_copy.csv")
+    datadf.to_csv("PmtData_new.csv")
 
     """
 
