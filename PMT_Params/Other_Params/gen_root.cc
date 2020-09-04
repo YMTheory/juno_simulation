@@ -2,7 +2,7 @@ void gen_root()
 {
 
     ifstream in;
-    in.open("PmtData_copy1.csv");
+    in.open("PmtData_copy.csv");
     string line;
     int tmpcol, tmpid, tmpdyn, tmphqe;
     char tmpsn[20];
@@ -12,27 +12,27 @@ void gen_root()
     TTree* tree = new TTree("PmtData_Lpmt", "lpmt parameters tree");
     tree->Branch("pmtID", &tmpid, "pmtID/I");
     tree->Branch("SN", &tmpsn, "SN[20]/C");
-    tree->Branch("isDyn", &tmpdyn, "isDyn/I");
-    tree->Branch("isHqe", &tmphqe, "isHqe/I");
-    tree->Branch("gain", &tmpgain, "gain/D");
-    tree->Branch("resolution", &tmprsl, "resolution/D");
-    tree->Branch("pde",&tmppde, "pde/D");
-    tree->Branch("darkRate", &tmpdcr, "darkRate/D");
-    tree->Branch("tts", &tmptts, "tts/D");
-    tree->Branch("tts_ss", &tmpttsss, "tss_ss/D");
-    tree->Branch("hv", &tmphv, "hv/D");
-    tree->Branch("amplitude", &tmpamp, "amplitude/D");
+    tree->Branch("MCP_Hama", &tmpdyn, "MCP_Hama/I");
+    tree->Branch("HiQE_MCP", &tmphqe, "HiQE_MCP/I");
+    tree->Branch("Gain", &tmpgain, "Gain/D");
+    tree->Branch("Resolution", &tmprsl, "Resolution/D");
+    tree->Branch("PDE",&tmppde, "PDE/D");
+    tree->Branch("DCR", &tmpdcr, "DCR/D");
+    tree->Branch("TTS", &tmptts, "TTS/D");
+    tree->Branch("TTS_SS", &tmpttsss, "TTS_SS/D");
+    tree->Branch("HV", &tmphv, "HV/D");
+    tree->Branch("Amplitude", &tmpamp, "Amplitude/D");
     tree->Branch("PvsV", &tmppvsv, "PvsV/D");
     tree->Branch("SvsN", &tmpsvsn, "SvsN/D");
-    tree->Branch("riseTime", &tmprt, "riseTime/D");
-    tree->Branch("fallTime", &tmpft, "fallTime/D");
-    tree->Branch("fwhm", &tmpfwhm, "fwhm/D");
+    tree->Branch("RiseTime", &tmprt, "RiseTime/D");
+    tree->Branch("FallTime", &tmpft, "FallTime/D");
+    tree->Branch("FWHM", &tmpfwhm, "FWHM/D");
     tree->Branch("timeOffset", &tmptoff, "timeOffset/D");
     tree->Branch("prePulseProb", &tmpppp, "prePulseProb/D");
     tree->Branch("afterPulseProb", &tmpapp, "afterPulseProb/D");
-    tree->Branch("pmtX", &tmpx, "pmtX/D");
-    tree->Branch("pmtY", &tmpy, "pmtY/D");
-    tree->Branch("pmtZ", &tmpz, "pmtZ/D");
+    tree->Branch("pmtPosX", &tmpx, "pmtPosX/D");
+    tree->Branch("pmtPosY", &tmpy, "pmtPosY/D");
+    tree->Branch("pmtPosZ", &tmpz, "pmPostZ/D");
 
 
 
