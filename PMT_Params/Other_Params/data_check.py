@@ -15,20 +15,17 @@ import matplotlib.pyplot as plt
 #plt.style.use("ggplot")
 
 if __name__ == "__main__":
-    df = pd.read_csv("PmtData.csv")
+    df = pd.read_csv("PmtData_new.csv")
 
-    pmtid = df["index"].to_numpy()
-    isdyn = df["isDyn"].to_numpy()
-    ishqe = df["isHqe"].to_numpy()
-    tts_ss = df["tts_ss"].to_numpy()
-    tts_ss_dyn = df["tts_ss"][df["isDyn"]==1].to_numpy()
-    tts_ss_hqmcp = df["tts_ss"][(df["isDyn"]==0) & (df["isHqe"]==1)]
-    tts_ss_lqmcp = df["tts_ss"][(df["isDyn"]==0) & (df["isHqe"]==0)]
-    #plt.hist(tts_ss, bins=100, range=(0,20), color="darkorange", alpha=0.6,  label="allpmt: %.2f"%tts_ss.mean())
-    plt.hist(tts_ss_dyn, bins=100,  range=(0,20), color="tomato", label="dynode: %.2f"%tts_ss_dyn.mean())
-    plt.hist(tts_ss_hqmcp, bins=100, range=(0,20), color="skyblue", alpha=0.6,  label="hqmcp: %.2f"%tts_ss_hqmcp.mean())
-    plt.hist(tts_ss_lqmcp, bins=100, range=(0,20), color="orchid", alpha=0.6,  label="lqmcp: %.2f"%tts_ss_lqmcp.mean())
-    plt.xlabel("tts_ss/ns")
+    dcr = df["DCR"].to_numpy()
+    dcr_dyn = df["DCR"][df["MCP_Hama"]==1].to_numpy()
+    dcr_hqmcp = df["DCR"][(df["MCP_Hama"]==0) & (df["HiQE_MCP"]==1)]
+    dcr_lqmcp = df["DCR"][(df["MCP_Hama"]==0) & (df["HiQE_MCP"]==0)]
+    plt.hist(dcr, bins=100, range=(0,100), color="darkorange", alpha=0.6,  label="allpmt: %.2f"%dcr.mean())
+    plt.hist(dcr_dyn, bins=100,  range=(0,100), color="tomato", alpha=0.6, label="dynode: %.2f"%dcr_dyn.mean())
+    plt.hist(dcr_hqmcp, bins=100, range=(0,100), color="skyblue", alpha=0.6,  label="hqmcp: %.2f"%dcr_hqmcp.mean())
+    plt.hist(dcr_lqmcp, bins=100, range=(0,100), color="orchid", alpha=0.6,  label="lqmcp: %.2f"%dcr_lqmcp.mean())
+    plt.xlabel("dcr")
     plt.legend()
-    plt.savefig("0902tts_ss.pdf")
-    #plt.show()
+    #plt.savefig("0904dcr.pdf")
+    plt.show()

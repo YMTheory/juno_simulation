@@ -276,7 +276,7 @@ if __name__ == "__main__" :
     num = 0
     print(np.array(pde2).shape)
     for i in range(17612):
-        toff_final.append(toff[i]); ppp_final.append(ppp[i]); app_final.append(app[i])
+        ppp_final.append(ppp[i]); app_final.append(app[i])
         if i in dyn_id:
             idx = dyn_id.index(i)
             idx_final.append(dyn_id[idx])
@@ -285,6 +285,7 @@ if __name__ == "__main__" :
             pde_final.append(pde1[idx]); isDyn_final.append(isDyn1[idx]); isHqe_final.append(isHqe1[idx]); tts_final.append(tts1[idx])
             amp_final.append(amp1[idx]); hv_final.append(hv1[idx]); pvsv_final.append(pvsv1[idx]); svsn_final.append(svsn1[idx])
             riset_final.append(riset1[idx]); fallt_final.append(fallt1[idx]); fwhm_final.append(fwhm1[idx]); tts_ss_final.append(tts_ss_dyn[idx])
+            toff_final.append(toff[i]); 
             num += 1
         elif i in lqmcp_id:
             idx = lqmcp_id.index(i)
@@ -293,6 +294,7 @@ if __name__ == "__main__" :
             pde_final.append(pde2[idx]); isDyn_final.append(isDyn2[idx]); isHqe_final.append(isHqe2[idx]); tts_final.append(tts2[idx])
             amp_final.append(amp2[idx]); hv_final.append(hv2[idx]); pvsv_final.append(pvsv2[idx]); svsn_final.append(svsn2[idx])
             riset_final.append(riset2[idx]); fallt_final.append(fallt2[idx]); fwhm_final.append(fwhm2[idx]); tts_ss_final.append(tts_ss_mcp[idx])
+            toff_final.append(toff[i]+30)
             num += 1
         elif i in hqmcp_id:
             idx = hqmcp_id.index(i)
@@ -301,6 +303,7 @@ if __name__ == "__main__" :
             pde_final.append(pde3[idx]); isDyn_final.append(isDyn3[idx]); isHqe_final.append(isHqe3[idx]); tts_final.append(tts3[idx])
             amp_final.append(amp3[idx]); hv_final.append(hv3[idx]); pvsv_final.append(pvsv3[idx]); svsn_final.append(svsn3[idx])
             riset_final.append(riset3[idx]); fallt_final.append(fallt3[idx]); fwhm_final.append(fwhm3[idx]); tts_ss_final.append(tts_ss_mcp[idx])
+            toff_final.append(toff[i]+30)
             num += 1
         else:
             print("==> No such PMT Index !")
