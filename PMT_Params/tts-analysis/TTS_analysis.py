@@ -173,7 +173,7 @@ def write_root(argv):
     #hist_nnvt = [TH2D("nnvt%d"%i, "", 24, -7.5, 360-7.5, 100, 0, 1000)  for i in range(7) ]
     hist_dyn = [TH1D("dyn%d"%i, "", 100, 0, 100) for i in range(7) ]
     hist_nnvt = [TH1D("nnvt%d"%i, "", 100, 0, 100)  for i in range(7) ]
-    hist_dyn0 = TH1D("dyn0", "", 200, 0, 40)
+    hist_dyn0 = TH1D("dyn0", "", 200, 0, 20)
     hist_dyn6 = TH1D("dyn6", "", 200, -10, 30)
     hist_mcp0 = TH1D("mcp0", "", 200, 0, 40)
     hist_dyn_phi = [ TH1D("dynPhi%d"%i, "", 200, 300, 500) for i in range(24) ]
@@ -215,7 +215,8 @@ def write_root(argv):
         elif scanid in ham_id:
             ham_num += 1
             print("It's a Dynode PMT !!!")
-            hist_dyn0.Fill( (np.sqrt(np.array(data1.iloc[0:24, 1])**2-2.1**2)).mean()  )
+            for ii in range(6):
+                hist_dyn0.Fill( (np.sqrt(np.array(data1.iloc[0:24, ii])**2-2.1**2)).mean()  )
             hist_dyn6.Fill( (np.sqrt(np.array(data1.iloc[0:24, 7])**2-2.1**2)).mean()  )
             #for idd, angle in enumerate(np.array(data1["angle"])):
                 #hist_dyn0.Fill(np.sqrt(np.array(data1.iloc[idd, 1])**2-2.1**2))
@@ -349,7 +350,7 @@ def interpolate(argv):
 
 
 def generate_dynode_tts():
-    infile = TFile("tts_led0+6_averagePhi.root", "read")
+    infile = TFile("tts_led0+6_averagePhi_new.root", "read")
     hled0 = infile.Get("dyn0")
     generated_tts = []
     num = 0
@@ -364,7 +365,7 @@ def generate_dynode_tts():
 
 
 def generate_mcp_tts():
-    infile = TFile("tts_led0+6_averagePhi.root", "read")
+    infile = TFile("tts_led0+6_averagePhi_new.root", "read")
     hled0 = infile.Get("mcp0")
     generated_tts = []
     num = 0
@@ -394,16 +395,16 @@ if __name__ == "__main__":
     #single_tube(sys.argv)
     #interpolate(sys.argv)
     
-   
+
     dyn_tts = generate_dynode_tts()
     mcp_tts = generate_mcp_tts()
-    with open("dynode_tts_sampled_averagePhi.csv", "w") as f:
+    with open("dynode_tts_sampled_averagePhi_0907.csv", "w") as f:
         for elem in dyn_tts:
             f.write(str(elem)+"\n")
-    with open("mcp_tts_sampled_averagePhi.csv", "w") as f:
+    with open("mcp_tts_sampled_averagePhi_0907.csv", "w") as f:
         for elem in mcp_tts:
             f.write(str(elem)+"\n")
-    
+
 
     #save_sampling(np.array(generate_dynode_tts()), np.array(generate_mcp_tts()))
 
