@@ -393,9 +393,9 @@ if __name__ == "__main__":
     #write_root(sys.argv)
     #re_analysis(sys.argv)
     #single_tube(sys.argv)
-    #interpolate(sys.argv)
+    interpolate(sys.argv)
     
-
+    """
     dyn_tts = generate_dynode_tts()
     mcp_tts = generate_mcp_tts()
     with open("dynode_tts_sampled_averagePhi_0907.csv", "w") as f:
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     with open("mcp_tts_sampled_averagePhi_0907.csv", "w") as f:
         for elem in mcp_tts:
             f.write(str(elem)+"\n")
-
+    """
 
     #save_sampling(np.array(generate_dynode_tts()), np.array(generate_mcp_tts()))
 

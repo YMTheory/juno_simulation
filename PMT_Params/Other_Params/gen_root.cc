@@ -8,7 +8,7 @@ void gen_root()
     char tmpsn[20];
     double tmpgain, tmprsl, tmpdcr, tmptts, tmppde,  tmpttsss, tmphv, tmpamp, tmppvsv, tmpsvsn, tmprt, tmpft, tmpfwhm, tmptoff, tmpppp, tmpapp, tmpx, tmpy, tmpz;
 
-    TFile* out = new TFile("PmtData_Lpmt.root", "recreate");
+    TFile* out = new TFile("PmtData_Lpmt0908.root", "recreate");
     TTree* tree = new TTree("PmtData_Lpmt", "lpmt parameters tree");
     tree->Branch("pmtID", &tmpid, "pmtID/I");
     tree->Branch("SN", &tmpsn, "SN[20]/C");
