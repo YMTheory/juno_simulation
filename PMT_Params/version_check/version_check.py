@@ -89,10 +89,10 @@ if __name__ == "__main__":
     all_qe_old, all_qe_new = [], []
     dyn_qe_old = np.array(dyn_pde_old) / 0.872
     dyn_qe_new = np.array(dyn_pde_new) / 0.872
-    hmcp_qe_old = np.array(hmcp_pde_old) / 0.916
-    hmcp_qe_new = np.array(hmcp_pde_new) / 0.916
-    lmcp_qe_old = np.array(lmcp_pde_old) / 0.957
-    lmcp_qe_new = np.array(lmcp_pde_new) / 0.957
+    hmcp_qe_old = np.array(hmcp_pde_old) / 0.957
+    hmcp_qe_new = np.array(hmcp_pde_new) / 0.957
+    lmcp_qe_old = np.array(lmcp_pde_old) / 0.916
+    lmcp_qe_new = np.array(lmcp_pde_new) / 0.916
     
     all_qe_old = list(dyn_qe_old) + list(hmcp_qe_old) + list(lmcp_qe_old)
     all_qe_new = list(dyn_qe_new) + list(hmcp_qe_new) + list(lmcp_qe_new)
