@@ -12,7 +12,7 @@ from ROOT import TFile, TTree
 import uproot as up
 
 def read_J20():
-    infile = up.open("../Other_Params/PmtData_Lpmt0908.root")
+    infile = up.open("../Other_Params/PmtData_Lpmt0911.root")
     tree = infile["PmtData_Lpmt"]
     pmtid = tree["pmtID"].array()
     isHam = tree["MCP_Hama"].array()
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     all_qe_old = list(dyn_qe_old) + list(hmcp_qe_old) + list(lmcp_qe_old)
     all_qe_new = list(dyn_qe_new) + list(hmcp_qe_new) + list(lmcp_qe_new)
 
-    """
+
 
     dyn_tts_old, dyn_tts_new = [], []
     mcp_tts_old, mcp_tts_new = [], []
@@ -113,52 +113,84 @@ if __name__ == "__main__":
             all_tts_old.append(oldtts)
             mcp_tts_new.append(newtts)
             all_tts_new.append(newtts)
-    """
-
+    
+    
     plt.figure(0)
-    plt.hist(dyn_qe_old, bins=100, range=(20, 40), alpha=0.4, color="salmon", label="J19 HamPmt: %.2f"%np.array(dyn_qe_old).mean())
-    plt.hist(dyn_qe_new, bins=100, range=(20, 40), alpha=0.4, color="cornflowerblue", label="J20 HamPmt: %.2f"%np.array(dyn_qe_new).mean())
-    print("dyn old pmt number: %d" %len(dyn_qe_old))
-    print("dyn new pmt number: %d" %len(dyn_qe_new))
+    plt.hist(dyn_tts_old, bins=100, range=(0, 10), alpha=0.4, color="salmon", label="J19 HamPmt: %.2f"%np.array(dyn_tts_old).mean())
+    plt.hist(dyn_tts_new, bins=100, range=(0, 10), alpha=0.4, color="cornflowerblue", label="J20 HamPmt: %.2f"%np.array(dyn_tts_new).mean())
+    print("dyn old pmt number: %d" %len(dyn_tts_old))
+    print("dyn new pmt number: %d" %len(dyn_tts_new))
     plt.legend()
     plt.xlabel("QE")
     plt.title("QE")
-    #plt.show()
-    plt.savefig("DynPmt_QE.pdf")
 
     plt.figure(1)
-    plt.hist(hmcp_qe_old, bins=100, range=(20, 40), alpha=0.4, color="salmon", label="J19 HiQE MCPPmt: %.2f"%np.array(hmcp_qe_old).mean())
-    plt.hist(hmcp_qe_new, bins=100, range=(20, 40), alpha=0.4, color="cornflowerblue", label="J20 HiQE MCPPmt: %.2f"%np.array(hmcp_qe_new).mean())
-    print("mcp old pmt number: %d" %len(hmcp_qe_old))
-    print("mcp new pmt number: %d" %len(hmcp_qe_new))
+    plt.hist(mcp_tts_old, bins=100, range=(0, 10), alpha=0.4, color="salmon", label="J19 HamPmt: %.2f"%np.array(mcp_tts_old).mean())
+    plt.hist(mcp_tts_new, bins=100, range=(0, 10), alpha=0.4, color="cornflowerblue", label="J20 HamPmt: %.2f"%np.array(mcp_tts_new).mean())
+    print("mcp old pmt number: %d" %len(mcp_tts_old))
+    print("mcp new pmt number: %d" %len(mcp_tts_new))
+    plt.legend()
+    plt.xlabel("QE")
+    plt.title("QE")
+
+    plt.figure(2)
+    plt.hist(all_tts_old, bins=100, range=(0, 10), alpha=0.4, color="salmon", label="J19 HamPmt: %.2f"%np.array(all_tts_old).mean())
+    plt.hist(all_tts_new, bins=100, range=(0, 10), alpha=0.4, color="cornflowerblue", label="J20 HamPmt: %.2f"%np.array(all_tts_new).mean())
+    print("all old pmt number: %d" %len(all_tts_old))
+    print("all new pmt number: %d" %len(all_tts_new))
+    plt.legend()
+    plt.xlabel("QE")
+    plt.title("QE")
+
+    plt.show()
+    
+    """
+    # PDE/QE distribution: Dynode, HiQE, Normal, All
+    plt.figure(0)
+    plt.hist(dyn_dcr_old, bins=100, range=(20, 40), alpha=0.4, color="salmon", label="J19 HamPmt: %.2f"%np.array(dyn_dcr_old).mean())
+    plt.hist(dyn_dcr_new, bins=100, range=(20, 40), alpha=0.4, color="cornflowerblue", label="J20 HamPmt: %.2f"%np.array(dyn_dcr_new).mean())
+    print("dyn old pmt number: %d" %len(dyn_dcr_old))
+    print("dyn new pmt number: %d" %len(dyn_dcr_new))
     plt.legend()
     plt.xlabel("QE")
     plt.title("QE")
     #plt.show()
-    plt.savefig("HMCPPmt_QE.pdf")
+    #plt.savefig("DynPmt_QE.pdf")
+
+    plt.figure(1)
+    plt.hist(hmcp_dcr_old, bins=100, range=(20, 40), alpha=0.4, color="salmon", label="J19 HiQE MCPPmt: %.2f"%np.array(hmcp_dcr_old).mean())
+    plt.hist(hmcp_dcr_new, bins=100, range=(20, 40), alpha=0.4, color="cornflowerblue", label="J20 HiQE MCPPmt: %.2f"%np.array(hmcp_dcr_new).mean())
+    print("mcp old pmt number: %d" %len(hmcp_dcr_old))
+    print("mcp new pmt number: %d" %len(hmcp_dcr_new))
+    plt.legend()
+    plt.xlabel("QE")
+    plt.title("QE")
+    #plt.show()
+    #plt.savefig("HMCPPmt_QE.pdf")
 
 
     plt.figure(2)
-    plt.hist(lmcp_qe_old, bins=100, range=(20, 40), alpha=0.4, color="salmon", label="J19 Normal MCPPmt: %.2f"%np.array(lmcp_qe_old).mean())
-    plt.hist(lmcp_qe_new, bins=100, range=(20, 40), alpha=0.4, color="cornflowerblue", label="J20 Normal MCPPmt: %.2f"%np.array(lmcp_qe_new).mean())
-    print("all old pmt number: %d" %len(lmcp_qe_old))
-    print("all new pmt number: %d" %len(lmcp_qe_new))
+    plt.hist(lmcp_dcr_old, bins=100, range=(20, 40), alpha=0.4, color="salmon", label="J19 Normal MCPPmt: %.2f"%np.array(lmcp_dcr_old).mean())
+    plt.hist(lmcp_dcr_new, bins=100, range=(20, 40), alpha=0.4, color="cornflowerblue", label="J20 Normal MCPPmt: %.2f"%np.array(lmcp_dcr_new).mean())
+    print("all old pmt number: %d" %len(lmcp_dcr_old))
+    print("all new pmt number: %d" %len(lmcp_dcr_new))
     plt.legend()
     plt.xlabel("QE")
     plt.title("QE")
     #plt.show()
-    plt.savefig("LMCPPmt_QE.pdf")
-
-    plt.figure(3)
-    plt.hist(all_qe_old, bins=100, range=(20, 40), alpha=0.4, color="salmon", label="J19 AllPmt: %.2f"%np.array(all_qe_old).mean())
-    plt.hist(all_qe_new, bins=100, range=(20, 40), alpha=0.4, color="cornflowerblue", label="J20 AllPmt: %.2f"%np.array(all_qe_new).mean())
-    print("all old pmt number: %d" %len(all_qe_old))
-    print("all new pmt number: %d" %len(all_qe_new))
-    plt.legend()
-    plt.xlabel("QE")
-    plt.title("QE")
-    #plt.show()
-    plt.savefig("AllPmt_QE.pdf")
-
+    #plt.savefig("LMCPPmt_QE.pdf")
     
 
+    plt.figure(3)
+    plt.hist(all_dcr_old, bins=100, range=(20, 40), alpha=0.4, color="salmon", label="J19 AllPmt: %.2f"%np.array(all_dcr_old).mean())
+    plt.hist(all_dcr_new, bins=100, range=(20, 40), alpha=0.4, color="cornflowerblue", label="J20 AllPmt: %.2f"%np.array(all_dcr_new).mean())
+    print("all old pmt number: %d" %len(all_dcr_old))
+    print("all new pmt number: %d" %len(all_dcr_new))
+    plt.legend()
+    plt.xlabel("QE")
+    plt.title("QE")
+    plt.show()
+    #plt.savefig("AllPmt_QE.pdf")
+    """
+    
+    
