@@ -6,8 +6,8 @@ void elecsim_check()
 {
 
 
-    TFile* infile = new TFile("/junofs/users/yumiao/simulation/software_test/trunk/newtrunk/gamma-mix/elecsim-1011.root", "read");
-    //TFile* infile = new TFile("/junofs/users/yumiao/simulation/software_test/trunk/newtrunk/gamma/elecsim-1011.root", "read");
+    //TFile* infile = new TFile("/junofs/users/yumiao/simulation/software_test/trunk/newtrunk/gamma-mix/elecsim-1011.root", "read");
+    TFile* infile = new TFile("/junofs/users/yumiao/simulation/software_test/trunk/newtrunk/SN-mix/elecsim-0.root", "read");
     TTree* tElec  = (TTree*)infile->Get("/Event/Elec/ElecEvent");
     TTree* tTruth = (TTree*)infile->Get("/Event/Sim/Truth/LpmtElecTruthEvent");
 
@@ -23,8 +23,9 @@ void elecsim_check()
 
     // output definition : 
     std::string pulseTag[5] = { "kNormalPulse", "kDarkPulse", "kAfterPulse", "kDNAfterPulse", "kUnknownPulse" };
-    TFile* out = new TFile("checkElecSim-mix.root", "recreate");
+    TFile* out = new TFile("checkElecSim-SNmix.root", "recreate");
     TTree* mytree = new TTree("mytree", "elecsim check tree");
+    int m_evtID;
     int m_nNormalPulse;
     int m_nDarkPulse;
     int m_nAfterPulse;
@@ -33,6 +34,8 @@ void elecsim_check()
     int m_tag[100000];
     double m_pulsetime[100000];
     double m_pulseamp[100000];
+    double m_tts[100000];
+    mytree->Branch("evtID", &m_evtID, "evtID/I");
     mytree->Branch("nPulse", &m_nPulse, "nPulse/I");
     mytree->Branch("nNormalPulse", &m_nNormalPulse, "nNormalPulse/I");
     mytree->Branch("nDarkPulse", &m_nDarkPulse, "nDarkPulse/I");
@@ -41,11 +44,13 @@ void elecsim_check()
     mytree->Branch("hittime", m_pulsetime, "hittime[nPulse]/D");
     mytree->Branch("tag", m_tag, "tag[nPulse]/I");
     mytree->Branch("amplitude", m_pulseamp, "amplitude[nPulse]/D");
+    mytree->Branch("TTS", m_tts, "TTS[nNormalPulse]/D");
 
 
 
     //for(int i=0; i<1; i++) {
     for(int i=0; i<tElec->GetEntries(); i++) {
+        m_evtID = i ;
         tElec->GetEntry(i);
         tTruth->GetEntry(i);
 
@@ -77,9 +82,10 @@ void elecsim_check()
             double m_TTS = m_truths->at(j).tts();                       // transit time of the hit
             double m_timeoffset = m_truths->at(j).timeoffset();         // time offset of the hit
             TimeStamp m_pulseHitTime = m_truths->at(j).pulseHitTime();  // TimeStamp of the pulse = event time stamp + transit time + time offset
-            if(m_pulsetype == "signal" ) {
-                m_nNormalPulse++;
+            if(m_pulsetype == "SN" ) {
                 m_tag[j] = 0;
+                m_tts[m_nNormalPulse] = m_TTS;
+                m_nNormalPulse++;
             } else if (m_pulsetype == "DarkPulse" ) {
                 m_nDarkPulse++;
                 m_tag[j] = 1;
